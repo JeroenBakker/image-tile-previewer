@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview image tiles</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #imageContainer {
+            background-color: transparent;
+            background-repeat: repeat;
+            background-size: 50%; /* Initial background size (width height) */
+        }
+
+        #sliderContainer {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 200px;
+        }
+
+        #slider {
+            width: 100%;
+        }
+    </style>
+</head>
+<body id="imageContainer">
+<div id="sliderContainer">
+    <input type="range" id="slider" min="1" max="200" value="50">
+</div>
+
+<button id="pasteButton">Paste Image</button>
+<script>
+    const pasteButton = document.getElementById('pasteButton');
+
+    pasteButton.addEventListener('click', async () => {
+        try {
+            const permissionStatus = await navigator.permissions.query({ name: 'clipboard-read' });
+            if (permissionStatus.state === 'granted' || permissionStatus.state === 'prompt') {
+                const clipboardItems = await navigator.clipboard.read();
+                for (const clipboardItem of clipboardItems) {
+                    for (const type of clipboardItem.types) {
+                        if (type.startsWith('image/')) {
+                            const blob = await clipboardItem.getType(type);
+                            const imageURL = URL.createObjectURL(blob);
+                            document.body.style.backgroundImage = `url(${imageURL})`;
+                        }
+                    }
+                }
+            } else {
+                console.error('Clipboard permission denied');
+            }
+        } catch (error) {
+            console.error('Failed to read clipboard', error);
+        }
+    });
+
+    const imageContainer = document.getElementById('imageContainer');
+    const slider = document.getElementById('slider');
+
+    function updateBackgroundSize() {
+        const scaleValue = slider.value;
+        const scalePercentage = `${scaleValue}%`;
+        imageContainer.style.backgroundSize = `${scalePercentage}`;
+    }
+
+    slider.addEventListener('input', updateBackgroundSize);
+</script>
+</body>
+</html>
