@@ -18,7 +18,7 @@
         #imageContainer {
             background-color: transparent;
             background-repeat: repeat;
-            background-size: 50%; /* Initial background size (width height) */
+            background-size: 25%; /* Initial background size (width height) */
         }
 
         #sliderContainer {
@@ -35,14 +35,12 @@
 </head>
 <body id="imageContainer">
 <div id="sliderContainer">
-    <input type="range" id="slider" min="1" max="100" value="50">
+    <input type="range" id="slider" min="1" max="100" value="25">
 </div>
 
-<button id="pasteButton">Paste Image</button>
+<span id="instructions">Simply paste the image</span>
 <script>
-    const pasteButton = document.getElementById('pasteButton');
-
-    pasteButton.addEventListener('click', async () => {
+    let useCopiedImage = async () => {
         try {
             const permissionStatus = await navigator.permissions.query({ name: 'clipboard-read' });
             if (permissionStatus.state === 'granted' || permissionStatus.state === 'prompt') {
@@ -57,12 +55,12 @@
                     }
                 }
             } else {
-                console.error('Clipboard permission denied');
+                alert('Clipboard permission denied');
             }
         } catch (error) {
-            console.error('Failed to read clipboard', error);
+            alert(`Failed to read clipboard, got error:\n${error}`);
         }
-    });
+    };
 
     const imageContainer = document.getElementById('imageContainer');
     const slider = document.getElementById('slider');
@@ -73,6 +71,8 @@
         imageContainer.style.backgroundSize = `${scalePercentage}`;
     }
 
+    document.addEventListener('paste', useCopiedImage);
+    document.addEventListener('paste', () => document.getElementById('instructions').remove());
     slider.addEventListener('input', updateBackgroundSize);
 </script>
 </body>
